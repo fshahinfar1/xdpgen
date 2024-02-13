@@ -44,7 +44,14 @@ int run()
 	const int key = 0;
 	struct bpf_map *m;
 	assert (args.ifindex > 0);
-	struct xdp_config cfg = { .ifindex_out = args.ifindex, };
+	struct xdp_config cfg = {
+		.ifindex_out = args.ifindex,
+		.src_ip = context.src_ip,
+		.dst_ip = context.dst_ip,
+		.src_port = context.src_port,
+		.dst_port = context.dst_port,
+		.protocol = IPPROTO_UDP,
+	};
 	m = bpf_object__find_map_by_name(context.bpfobj, "config");
 	bpf_map__update_elem(m, &key, sizeof(key), &cfg, sizeof(cfg), BPF_ANY);
 

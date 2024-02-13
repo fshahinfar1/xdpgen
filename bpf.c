@@ -20,11 +20,33 @@ struct {
 SEC("xdp")
 int prog(struct xdp_md *ctx)
 {
-	__u32 zero = 0;
 	struct xdp_config *cfg = NULL;
+	void *data = (void *)(__u64)ctx->data;
+	void *data_end = (void *)(__u64)ctx->data_end;
+	struct ethhdr *eth = data;
+	struct iphdr *ip = (void *)(eth + 1);
+	struct udphdr *udp = (void *)(ip + 1);
+
+	if ((void *)(udp + 1) > data_end)
+		return XDP_PASS;
+
+	__u32 zero = 0;
 	cfg = bpf_map_lookup_elem(&config, &zero);
 	if (cfg == NULL)
 		return XDP_ABORTED;
+
+	/* Check if the packet is sent from the traffic generator to be sent
+	 * toward DUT */
+	if (eth->h_proto != bpf_htons(ETH_P_IP))
+		return XDP_PASS;
+	if (ip->protocol != cfg->protocol)
+		return XDP_PASS;
+	if (ip->saddr != cfg->src_ip ||
+			ip->daddr != cfg->dst_ip ||
+			udp->source != cfg->src_port ||
+			udp->dest != cfg->dst_port)
+		return XDP_PASS;
+
 	/* bpf_printk("on: %d", ctx->ingress_ifindex); */
 	/* bpf_printk("here, redirect to ifindex: %d", cfg->ifindex_out); */
 	int ret = bpf_redirect(cfg->ifindex_out, 0);
