@@ -1,14 +1,10 @@
-ifndef KASHK_DIR
-$(error "KASHK_DIR env variable is not set")
-endif
-CLANG := clang
-LLC := llc
+CLANG := clang-11
+LLC := llc-11
 CC := $(CLANG)
 CFLAGS := -g -O2 -Wall
 LDFLAGS := -lbpf -lz
 RUNNER := ./build/runner
 HEADERS := $(wildcard *.h)
-COMPILE_SCRIPT = $(KASHK_DIR)/compile_scripts/compile_bpf_source.sh
 BPF := ./build/bpf.o
 
 .PHONY: clean
@@ -20,7 +16,6 @@ $(RUNNER): runner.c $(HEADERS)
 	$(CC) $(CFLAGS) -o $@ runner.c $(LDFLAGS)
 
 $(BPF): bpf.c
-	sudo bash $(COMPILE_SCRIPT) ./bpf.c $@ > /dev/null
 	$(CLANG) -S \
 		-target bpf \
 		-D __BPF_TRACING__ \
@@ -33,3 +28,4 @@ $(BPF): bpf.c
 
 clean:
 	rm  build/runner
+	rm  build/bpf.*
