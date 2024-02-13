@@ -7,6 +7,15 @@ possible needs.
 
 [1] https://github.com/xdp-project/xdp-tools/tree/master/xdp-trafficgen
 
+## Running
+
+> The source/destination address are hard-coded in `runner.c::main()`
+
+```
+make
+sudo ./build/runner -i <iface>
+```
+
 ## Requirements
 
 It requires a new kernel. It did not worked on v5.15. I tested with 6.7.3 and
