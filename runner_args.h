@@ -13,13 +13,17 @@ struct parameters {
 	char *progname;
 	char *ifname;
 	int ifindex;
+	int local;
 };
 extern struct parameters args;
 
 void usage(void) {
 	printf("loader:\n"
-		"  --repeat     -r   [default 10^7]\n"
-		"  --iface     -i    interface to use in cross test\n"
+		"  --repeat    -r   [default 10^7]\n"
+		"  --iface     -i   interface to use in cross test\n"
+		"  --local     -l   the target server is on the local machine.\n"
+		"                   this mode emulate receiving traffic from"
+		"                   network.\n"
 		"  --help      -h\n"
 	);
 }
@@ -31,6 +35,7 @@ void parse_args(int argc, char *argv[]) {
 		{"help",       no_argument,       NULL, 'h'},
 		{"repeat",     required_argument, NULL, 'r'},
 		{"iface",      required_argument, NULL, 'i'},
+		{"local",      no_argument,       NULL, 'l'},
 		/* End of option list ------------------- */
 		{NULL, 0, NULL, 0},
 	};
@@ -39,6 +44,7 @@ void parse_args(int argc, char *argv[]) {
 	args.repeat = 1000000;
 	args.binary_path = "./build/bpf.o";
 	args.progname = "prog";
+	args.local = 0;
 
 	while (1) {
 		ret = getopt_long(argc, argv, "hi:r:", long_opts, NULL);
@@ -52,6 +58,9 @@ void parse_args(int argc, char *argv[]) {
 				args.ifname = strdup(optarg);
 				args.ifindex = if_nametoindex(optarg);
 				assert(args.ifindex > 0);
+				break;
+			case 'l':
+				args.local = 1;
 				break;
 			case 'h':
 				usage();

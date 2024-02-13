@@ -34,6 +34,10 @@ int prog(struct xdp_md *ctx)
 	cfg = bpf_map_lookup_elem(&config, &zero);
 	if (cfg == NULL)
 		return XDP_ABORTED;
+	if (cfg->target_is_local) {
+		/* We are emulating traffic comming from network. */
+		return XDP_PASS;
+	}
 
 	/* Check if the packet is sent from the traffic generator to be sent
 	 * toward DUT */

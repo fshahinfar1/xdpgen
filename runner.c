@@ -51,7 +51,11 @@ int run()
 		.src_port = context.src_port,
 		.dst_port = context.dst_port,
 		.protocol = IPPROTO_UDP,
+		.target_is_local = 0,
 	};
+	if (args.local) {
+		cfg.target_is_local = 1;
+	}
 	m = bpf_object__find_map_by_name(context.bpfobj, "config");
 	bpf_map__update_elem(m, &key, sizeof(key), &cfg, sizeof(cfg), BPF_ANY);
 
@@ -86,8 +90,12 @@ int main(int argc, char *argv[])
 
 	SET_MAC(context.src_mac, 0x9c,0xdc,0x71,0x56,0xbf,0x25);
 	SET_MAC(context.dst_mac, 0x9c,0xdc,0x71,0x4b,0x83,0x61);
+	/* SET_MAC(context.src_mac, 0x00,0x00,0x00,0x00,0x00,0x00); */
+	/* SET_MAC(context.dst_mac, 0x00,0x00,0x00,0x00,0x00,0x00); */
 	inet_pton(AF_INET, "192.168.1.2", &context.src_ip);
 	inet_pton(AF_INET, "192.168.1.1", &context.dst_ip);
+	/* inet_pton(AF_INET, "127.0.0.2", &context.src_ip); */
+	/* inet_pton(AF_INET, "127.0.0.1", &context.dst_ip); */
 	context.src_port = htons(50123);
 	context.dst_port = htons(8080);
 

@@ -8,5 +8,6 @@ struct xdp_config {
 	__u16 src_port;
 	__u16 dst_port;
 	__u8  protocol;
+	__u8  target_is_local;
 };
 #endif

@@ -161,10 +161,10 @@ int send_payload(int prog_fd, const char *input, char *output, size_t out_size)
 	/* it is fine to not have udp checksum */
 	udp->check = 0;
 	memcpy(payload, input, payload_size);
-	/* csum = 0; */
-	/* void *data_end = payload + payload_size; */
-	/* ipv4_l4_csum_inline(data_end, udp, ip, &csum); */
-	/* udp->check = ntohs(csum); */
+	csum = 0;
+	void *data_end = payload + payload_size;
+	ipv4_l4_csum_inline(data_end, udp, ip, &csum);
+	udp->check = ntohs(csum);
 	ret = send_packet(prog_fd, pkt, pkt_size, output, out_size);
 	free(pkt);
 	return ret;
